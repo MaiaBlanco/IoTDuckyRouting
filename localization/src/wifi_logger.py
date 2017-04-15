@@ -6,10 +6,11 @@ import pprint
 import re
 import sys
 import json
+import numpy as np
 
 # Add the names of any access points/ESSIDs to scan here
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
-NUM_SAMPLES = 20
+NUM_SAMPLES = 300
 # Store associated MAC addresses when found to this dict
 AP_Dict = {}
 # log data indexed by x,y location
@@ -94,6 +95,16 @@ if __name__ == "__main__":
 	f = open(fname, 'w')
 	f.write(json.dumps(results, ensure_ascii=False, indent=4, sort_keys=True))
 	f.close()
+
+	# Calculate std dev and mean
+	for key, value in results:
+		# Look at a specific point, and within that the AP
+		for AP in ESSIDs:	
+			samples = np.array([float(x["dbm_level"]) for x in value[AP]])
+			print("Mean: {}".format(np.mean(samples)))
+			print("Median: {}".format(np.median(samples)))
+			print("Std dev: {}".format(np.std(samples)))
+
 
 
 

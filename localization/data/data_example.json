@@ -1,0 +1,222 @@
+{
+    "(6.0, 3.0, 4.0)": {
+        "IOT-AP01": [
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }
+        ], 
+        "IOT-AP02": [
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }
+        ], 
+        "IOT-AP03": [
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }
+        ], 
+        "IOT-AP04": [
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }
+        ]
+    }, 
+    "(6.0, 6.0, 6.0)": {
+        "IOT-AP01": [
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-45", 
+                "quality": "65", 
+                "quality_total": "70"
+            }
+        ], 
+        "IOT-AP02": [
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-36", 
+                "quality": "70", 
+                "quality_total": "70"
+            }
+        ], 
+        "IOT-AP03": [
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-31", 
+                "quality": "70", 
+                "quality_total": "70"
+            }
+        ], 
+        "IOT-AP04": [
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }, 
+            {
+                "dbm_level": "-30", 
+                "quality": "70", 
+                "quality_total": "70"
+            }
+        ]
+    }
+}

@@ -57,7 +57,7 @@ def logPoints(SSID_List):
 
 def SSIDScan(SSID_List):
 	rawData = iwlist.scan() # No arg since defaults to wlan0
-	cells = iwlist.parse(initScan)
+	cells = iwlist.parse(rawData)
 	ssids = [x for x in cells if x["essid"] in SSID_List]
 	tags = ["quality", "quality_total", "dbm_level", "signal_level", "signal_total"]
 	data = { x["essid"] : {k:v for k,v in x.iteritems() if k in tags} for x in ssids}

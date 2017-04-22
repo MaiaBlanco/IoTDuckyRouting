@@ -75,7 +75,7 @@ def lognormalShadowingModel(RSS, A, eta):
 	# recvPower = A - 10*eta*log(d/d_0) + N
 	# Assuming d_0 = 1 meter (100cm) for all models
 	# Can't model N, so just have A and eta as input params
-	return math.exp( (RSS - A) / (10*eta) ) * 100
+	return math.pow( 10, (RSS - A) / (10*eta) ) * 100
 
 if __name__ == "__main__":
 	# # Check user input

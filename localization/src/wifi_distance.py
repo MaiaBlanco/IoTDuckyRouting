@@ -109,7 +109,7 @@ if __name__ == "__main__":
 	# Now continue recording new data and moving the window average along the array:
 	while True:
 		results = getAPSignals(ESSIDs)
-		for SSID in samples.keys():
+		for SSID in sorted(samples.keys()):
 			# Find the distance using the lognormal model:
 			distances[SSID] = lognormalShadowingModel( np.mean(samples[SSID]), \
 				LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )

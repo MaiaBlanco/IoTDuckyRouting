@@ -10,7 +10,7 @@ import numpy as np
 
 # Add the names of any access points/ESSIDs to scan here
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
-NUM_SAMPLES = 300
+NUM_SAMPLES = 20
 # Store associated MAC addresses when found to this dict
 AP_Dict = {}
 # log data indexed by x,y location

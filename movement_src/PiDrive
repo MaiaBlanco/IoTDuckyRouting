@@ -14,30 +14,54 @@ def STOP():
 	lmotor.run(Adafruit_MotorHAT.RELEASE)
 	rmotor.run(Adafruit_MotorHAT.RELEASE)
 
-atexit.register(STOP)
+#atexit.register(STOP)
 
 def DRIVE(lspd,rspd):
 	# Left Motor Drive Speed
 	if (lspd>0):
-		lmotor.run(Adafruit_MotorHAT.FORWARD);
-		lmotor.setSpeed(lspd);
+		lmotor.run(Adafruit_MotorHAT.FORWARD)
+		lmotor.setSpeed(lspd)
 	elif (lspd<0):
-		lmotor.run(Adafruit_MotorHAT.BACKWARD);
-		lmotor.setSpeed(-lspd);
+		lmotor.run(Adafruit_MotorHAT.BACKWARD)
+		lmotor.setSpeed(-lspd)
 	else:
-		lmotor.run(Adafruit_MotorHAT.RELEASE);
+		lmotor.run(Adafruit_MotorHAT.RELEASE)
 
 	# Right Motor Drive Speed
 	if (rspd>0):
-		rmotor.run(Adafruit_MotorHAT.FORWARD);
-		rmotor.setSpeed(rspd);
+		rmotor.run(Adafruit_MotorHAT.FORWARD)
+		rmotor.setSpeed(rspd)
 	elif (rspd<0):
-		rmotor.run(Adafruit_MotorHAT.BACKWARD);
-		rmotor.setSpeed(-rspd);
+		rmotor.run(Adafruit_MotorHAT.BACKWARD)
+		rmotor.setSpeed(-rspd)
 	else:
-		rmotor.run(Adafruit_MotorHAT.RELEASE);
+		rmotor.run(Adafruit_MotorHAT.RELEASE)
 
-def GO(speed):
-	DRIVE(speed,speed);
+def GO(speed,steer):
+	DRIVE(speed+steer,speed-steer)
+	time.sleep(0.01);
 
 ################################# DC motor test!
+if (sys.argv[1]=='go'):
+	GO(75,0)
+elif (sys.argv[1]=='slow'):
+	GO(50,0)
+elif (sys.argv[1]=='fast'):
+	GO(250,0)
+elif (sys.argv[1]=='back'):
+	GO(-75,0)
+elif (sys.argv[1]=='getout'):
+	GO(-250,0)
+elif (sys.argv[1]=='jump'):
+	for i in reversed(range(50,75)):
+		GO(i,0);
+elif (sys.argv[1]=='stop'):
+	STOP()
+elif (sys.argv[1]=='left'):
+	GO(0,-75)
+elif (sys.argv[1]=='right'):
+	GO(0,75)
+elif (sys.argv[1]=='loop'):
+	GO(100,50)
+else:
+	print("ERROR")

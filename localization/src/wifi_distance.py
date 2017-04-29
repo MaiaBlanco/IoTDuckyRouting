@@ -8,12 +8,13 @@ import sys
 import json
 import numpy as np
 import math
-from circular_weighted import weightedCircularEstimator
+from circular_estimator import weightedCircularEstimator
+from circular_estimator import stdCircularEstimator
 
 # Add the names of any access points/ESSIDs to scan here:
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
 # number of samples to keep for techniques like moving average:
-NUM_SAMPLES = 1
+NUM_SAMPLES = 20
 # reference to pretty print function:
 pp = pprint.PrettyPrinter(indent=4)
 # Lognormal distance model parameters (A, eta, R^2):
@@ -84,14 +85,51 @@ def lognormalShadowingModel(RSS, A, eta):
 	# Can't model N, so just have A and eta as input params
 	return math.pow( 10, (RSS - A) / (10*eta) ) * 100
 
+def localize(ESSIDs, circType, z_height, LN_AP_PARAMS, samples, coordinates):
+	# Now continue recording new data and moving the window average along the array:
+	results = getAPSignals(ESSIDs)
+	SSID_keys = sorted(samples.keys())
+	for i in range(len(SSID_keys)):
+		SSID = SSID_keys[i]
+		# circulate the moving average window:
+		samples[SSID] = np.roll(samples[SSID], -1)
+		samples[SSID][NUM_SAMPLES-1] = results[SSID]
+		# Find the distance using the lognormal model:
+		distances[i] = lognormalShadowingModel( np.mean(samples[SSID]), \
+			LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )
+		#print("Distance from AP {}: {} cm".format(SSID, distances[i]))
+
+	# Now get an estimate of where we are:
+	if circType == 'weighted':
+		if z_height == -1:
+			min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates)
+		else:
+			min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates, z=z_height)
+	elif circType == 'std':
+		if z_height == -1:
+			min_result = stdCircularEstimator(distances, AP_COORDS, coordinates)
+		else:
+			min_result = stdCircularEstimator(distances, AP_COORDS, coordinates, z=z_height)
+	else:
+		eprint('ERROR: invalid circular estimator type! (Needs weighted or std)')
+		return None
+	return (samples, min_result)
+
 if __name__ == "__main__":
-	# # Check user input
-	# if len(sys.argv) != 2:
-	# 	eprint("USAGE: {} output_filename.json".format(sys.argv[0]))
-	# 	sys.exit(1)
-	# # Open log file
-	# fname = sys.argv[1]
-	# Get initial scan to verify that APs are present:
+	# Check user input
+	if len(sys.argv) < 2:
+		eprint("USAGE: {} <-1 or given z height.> <OPTIONAL: 'weighted' or 'standard' for different circular estimators".format(sys.argv[0]))
+		sys.exit(1)
+	z_height = float(sys.argv[1])
+	if len(sys.argv) == 3:
+		if str(sys.argv[2]) == 'std':
+			circType = 'std'
+		elif str(sys.argv[2]) == 'weighted':
+			circType = 'weighted'
+		else:
+			# default is weighted
+			circType = 'weighted'
+	#Get initial scan to verify that APs are present:
 	initScan = iwlist.scan()
 	cells = iwlist.parse(initScan)
 	cells = [x for x in cells if x["essid"] in ESSIDs]
@@ -105,7 +143,7 @@ if __name__ == "__main__":
 	print("Successfully found {} SSIDs:".format(len(ESSIDs)) )
 	[ print(x["essid"], end=" ") for x in cells ]
 	print()
-	# start getting data:
+
 	samples = { x:np.zeros(NUM_SAMPLES) for x in ESSIDs }
 	distances = [ 0.0 for x in ESSIDs ]
 	print("Getting {} samples to start localizing...".format(NUM_SAMPLES))
@@ -113,26 +151,11 @@ if __name__ == "__main__":
 		results = getAPSignals(ESSIDs)
 		for SSID in ESSIDs:
 			samples[SSID][i] = results[SSID]
-	# Now continue recording new data and moving the window average along the array:
-        coordinates = [0,0,0]
-        while True:
-		results = getAPSignals(ESSIDs)
-                SSID_keys = sorted(samples.keys())
-		for i in range(len(SSID_keys)):
-                        SSID = SSID_keys[i]
-			# Find the distance using the lognormal model:
-			distances[i] = lognormalShadowingModel( np.mean(samples[SSID]), \
-				LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )
-			# circulate the moving average window:
-			samples[SSID] = np.roll(samples[SSID], -1)
-			samples[SSID][NUM_SAMPLES-1] = results[SSID]
-			print("Distance from AP {}: {} cm".format(SSID, distances[i]))
-
-                # Now get an estimate of where we are:
-                #min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates)
-                min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates, z=9.5)
-                if min_result is not None:
-                    coordinates = min_result[:]
-                    print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[2]))
-                else:
-                    eprint("ERROR: result of minimization was NONE!")
+	coordinates = [0,0,0]
+	while True:
+		(samples, min_result) = localize(ESSIDs, circType, z_height, LN_AP_PARAMS, samples, coordinates)
+		if min_result is not None:
+			coordinates = min_result[:]
+			print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[2]))
+		else:
+			eprint("ERROR: result of minimization was NONE! Skipping...")

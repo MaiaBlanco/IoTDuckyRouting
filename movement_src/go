@@ -1,0 +1,42 @@
+#!/usr/bin/python
+from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+
+import time
+import atexit
+
+# create a default object, no changes to I2C address or frequency
+mh = Adafruit_MotorHAT(addr=0x60)
+
+# recommended for auto-disabling motors on shutdown!
+def turnOffMotors():
+	mh.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
+	mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
+	mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
+	mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+
+atexit.register(turnOffMotors)
+
+################################# DC motor test!
+leftMotor = mh.getMotor(1)
+rightMotor = mh.getMotor(2)
+
+# set the speed to start, from 0 (off) to 255 (max speed)
+leftMotor.setSpeed(150)
+rightMotor.setSpeed(150)
+leftMotor.run(Adafruit_MotorHAT.FORWARD);
+rightMotor.run(Adafruit_MotorHAT.FORWARD);
+# turn on motor
+leftMotor.run(Adafruit_MotorHAT.RELEASE);
+rightMotor.run(Adafruit_MotorHAT.RELEASE);
+
+
+while (True):
+	leftMotor.run(Adafruit_MotorHAT.FORWARD)
+	rightMotor.run(Adafruit_MotorHAT.FORWARD)
+	
+	leftMotor.setSpeed(75)
+	rightMotor.setSpeed(75)
+	time.sleep(0.01)
+	
+	
+

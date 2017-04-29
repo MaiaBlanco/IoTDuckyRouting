@@ -13,7 +13,7 @@ from circular_weighted import weightedCircularEstimator
 # Add the names of any access points/ESSIDs to scan here:
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
 # number of samples to keep for techniques like moving average:
-NUM_SAMPLES = 1
+NUM_SAMPLES = 20
 # reference to pretty print function:
 pp = pprint.PrettyPrinter(indent=4)
 # Lognormal distance model parameters (A, eta, R^2):
@@ -85,13 +85,12 @@ def lognormalShadowingModel(RSS, A, eta):
 	return math.pow( 10, (RSS - A) / (10*eta) ) * 100
 
 if __name__ == "__main__":
-	# # Check user input
-	# if len(sys.argv) != 2:
-	# 	eprint("USAGE: {} output_filename.json".format(sys.argv[0]))
-	# 	sys.exit(1)
-	# # Open log file
-	# fname = sys.argv[1]
-	# Get initial scan to verify that APs are present:
+	# Check user input
+	if len(sys.argv) != 2:
+		eprint("USAGE: {} <-1 or given z height.".format(sys.argv[0]))
+		sys.exit(1)
+	z_height = float(sys.argv[1])
+	#Get initial scan to verify that APs are present:
 	initScan = iwlist.scan()
 	cells = iwlist.parse(initScan)
 	cells = [x for x in cells if x["essid"] in ESSIDs]
@@ -129,8 +128,10 @@ if __name__ == "__main__":
 			print("Distance from AP {}: {} cm".format(SSID, distances[i]))
 
                 # Now get an estimate of where we are:
-                #min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates)
-                min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates, z=9.5)
+                if z_height == -1:
+                    min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates)
+                else:
+                    min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates, z=z_height)
                 if min_result is not None:
                     coordinates = min_result[:]
                     print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[2]))

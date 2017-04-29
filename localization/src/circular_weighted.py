@@ -19,9 +19,9 @@ def weightedCircularEstimator(dists, AP_list, x0, z=-1):
 	room_dimensions = [(0,812), (0, 533), (0, 400)] # In cm, as with everything else here
 	if z != -1:
 		x0 = x0[:2]
-		res = minimize(weightedCircularFun2, x0, args=(z, dists, AP_list), method='SLSQP')#, bounds=room_dimensions[:2])
+		res = minimize(weightedCircularFun2, x0, args=(z, dists, AP_list), method='SLSQP', bounds=room_dimensions[:2])
 	else:
-		res = minimize(weightedCircularFun3, x0, args=(dists, AP_list), method='SLSQP')
+		res = minimize(weightedCircularFun3, x0, args=(dists, AP_list), method='SLSQP', bounds=room_dimensions)
 	if not res.success:
 		eprint("ERROR: Could not find x,y,z given the input distances. :(")
 		eprint("Message: "+res.message)

@@ -120,6 +120,7 @@ if __name__ == "__main__":
 			print("Distance from AP {}: {} cm".format(SSID, distances[SSID]))
 
 			# Now get an estimate of where we are:
-			coordinates = weightedCircularEstimator(distances, LN_AP_PARAMS.values(), coordinates)
+			coordinates = [0,0,0]
+                        coordinates = weightedCircularEstimator(distances, LN_AP_PARAMS.values(), coordinates)
 			#coordinates = weightedCircularEstimator(distances, LN_AP_PARAMS.values(), coordinates, z=9.5)
                         print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[3]))

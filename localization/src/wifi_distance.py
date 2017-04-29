@@ -13,7 +13,7 @@ from circular_weighted import weightedCircularEstimator
 # Add the names of any access points/ESSIDs to scan here:
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
 # number of samples to keep for techniques like moving average:
-NUM_SAMPLES = 10
+NUM_SAMPLES = 1
 # reference to pretty print function:
 pp = pprint.PrettyPrinter(indent=4)
 # Lognormal distance model parameters (A, eta, R^2):
@@ -24,7 +24,13 @@ LN_AP_PARAMS = \
 	"IOT-AP03":(-33.712, -2.0273, 0.5873 ),
 	"IOT-AP04":(-32.598, -1.4818, 0.4727 )
 }
-
+AP_COORDS = \
+[
+        [122, 1.5, 201.5],
+	[177.5, 531.5, 204],
+	[672.5, 531.5, 202.5],
+	[640, 1.5, 201]	
+]
 
 # Error printing
 def eprint(*args, **kwargs):
@@ -101,26 +107,32 @@ if __name__ == "__main__":
 	print()
 	# start getting data:
 	samples = { x:np.zeros(NUM_SAMPLES) for x in ESSIDs }
-	distances = { x:0.0 for x in ESSIDs }
+	distances = [ 0.0 for x in ESSIDs ]
 	print("Getting {} samples to start localizing...".format(NUM_SAMPLES))
 	for i in range(NUM_SAMPLES):
 		results = getAPSignals(ESSIDs)
 		for SSID in ESSIDs:
 			samples[SSID][i] = results[SSID]
 	# Now continue recording new data and moving the window average along the array:
-	while True:
+        coordinates = [0,0,0]
+        while True:
 		results = getAPSignals(ESSIDs)
-		for SSID in sorted(samples.keys()):
+                SSID_keys = sorted(samples.keys())
+		for i in range(len(SSID_keys)):
+                        SSID = SSID_keys[i]
 			# Find the distance using the lognormal model:
-			distances[SSID] = lognormalShadowingModel( np.mean(samples[SSID]), \
+			distances[i] = lognormalShadowingModel( np.mean(samples[SSID]), \
 				LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )
 			# circulate the moving average window:
 			samples[SSID] = np.roll(samples[SSID], -1)
 			samples[SSID][NUM_SAMPLES-1] = results[SSID]
-			print("Distance from AP {}: {} cm".format(SSID, distances[SSID]))
+			print("Distance from AP {}: {} cm".format(SSID, distances[i]))
 
-			# Now get an estimate of where we are:
-			coordinates = [0,0,0]
-                        coordinates = weightedCircularEstimator(distances, LN_AP_PARAMS.values(), coordinates)
-			#coordinates = weightedCircularEstimator(distances, LN_AP_PARAMS.values(), coordinates, z=9.5)
-                        print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[3]))
+                # Now get an estimate of where we are:
+                #min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates)
+                min_result = weightedCircularEstimator(distances, AP_COORDS, coordinates, z=9.5)
+                if min_result is not None:
+                    coordinates = min_result[:]
+                    print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[2]))
+                else:
+                    eprint("ERROR: result of minimization was NONE!")

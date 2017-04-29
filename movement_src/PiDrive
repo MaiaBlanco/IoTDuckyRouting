@@ -96,13 +96,17 @@ elif (sys.argv[1]=='keyboard'):
 		stdscr.addch(20,25,key)
 		stdscr.refresh()
 		if key == curses.KEY_UP: 
-			drive_speed=drive_speed+10
+			if drive_speed<250:
+				drive_speed=drive_speed+10
 		elif key == curses.KEY_DOWN: 
-			drive_speed=drive_speed-10
-		elif key == curses.KEY_LEFT: 
-			drive_turn=drive_turn-5
+			if drive_speed>-250:
+				drive_speed=drive_speed-10
+		elif key == curses.KEY_LEFT:
+			if drive_turn>-100:
+				drive_turn=drive_turn-5
 		elif key == curses.KEY_RIGHT: 
-			drive_turn=drive_turn+5
+			if drive_turn<100:
+				drive_turn=drive_turn+5
 		stdscr.addstr(2,20,"Speed: "+str(drive_speed)+"     ");
 		stdscr.addstr(3,20,"Turn: "+str(drive_turn)+"     ");
 		GO(drive_speed,drive_turn);

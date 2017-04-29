@@ -8,6 +8,7 @@ import sys
 import json
 import numpy as np
 import math
+from circular_weighted import weightedCircularEstimator
 
 # Add the names of any access points/ESSIDs to scan here:
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
@@ -117,4 +118,8 @@ if __name__ == "__main__":
 			samples[SSID] = np.roll(samples[SSID], -1)
 			samples[SSID][NUM_SAMPLES-1] = results[SSID]
 			print("Distance from AP {}: {} cm".format(SSID, distances[SSID]))
-			#coordinates = coordsFromAPDists(distances)
+
+			# Now try getting an estimate of where we are:
+			coordinates = weightedCircularEstimator(distances, LN_AP_PARAMS.values(), coordinates)
+			#coordinates = weightedCircularEstimator(distances, LN_AP_PARAMS.values(), coordinates, z=9.5)
+

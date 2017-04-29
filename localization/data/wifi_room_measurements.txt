@@ -28,3 +28,8 @@ IOT-APO1		|	122, 1.5, 201.5				|
 IOT-APO2		|	177.5, 531.5, 204			|
 IOT-APO3		|	672.5, 531.5, 202.5			|
 IOT-AP04		|	640, 1.5, 201				|
+
+
+Bounds of checkered area on the floor are:
+X: 146 665
+Y: 128 400

@@ -11,6 +11,7 @@ import math
 from circular_estimator import weightedCircularEstimator
 from circular_estimator import stdCircularEstimator
 from scipy import stats
+from scipy.optimize import brentq
 
 # Weighted or standard circular estimator:
 method = 'weighted'
@@ -27,6 +28,14 @@ LN_AP_PARAMS = \
 	"IOT-AP02":(-34.308, -1.9197, 0.6073 ),
 	"IOT-AP03":(-33.712, -2.0273, 0.5873 ),
 	"IOT-AP04":(-32.598, -1.4818, 0.4727 )
+}
+# Second order log fit parameters (ax^2 + bx + c), for x = log(d/1meter)
+SECORD_AP_PARAMS = \
+{
+	"IOT-AP01":( 3.51, -20.08, -35.77 ),
+	"IOT-AP02":( 4.367, -19.307,  -35.387 ),
+	"IOT-AP03":( 4.189, -20.587, -35.351 ),
+	"IOT-AP04":( 0.3664, -14.808, -32.76 )
 }
 AP_COORDS = \
 [
@@ -47,7 +56,7 @@ def getAPSignals(SSID_List):
 	for SSID in SSID_List:
 		if "dbm_level" in values[SSID].keys():
 			dataPoints[SSID] = float(values[SSID]["dbm_level"])
-			print("Used dbm level for {}".format(SSID))
+			#print("Used dbm level for {}".format(SSID))
 		elif "signal_level" in values[SSID].keys() and \
 		"signal_total" in values[SSID].keys():
 			dataPoints[SSID] = float(values[SSID]["signal_level"])/\
@@ -70,12 +79,9 @@ def SSIDScan(SSID_List):
 # Algorithms for finding distance:
 # Simple RSSI signal model -- prone to noise -- these perform map RSSI to distance
 #	lognormal shadowing path loss model
-#	Nakagami fading model
-#	Rayleigh Fading Model
-#	Ricean fading model
+# 	2nd order lognormal fit model
 # Weighted least squares, as in Tarrio et al. paper:
-#	Hyperbolic
-#	Circular
+#	Circular - standard and weighted
 
 # Return distance to AP in cm based on measured RSS and A, eta parameters for AP
 def lognormalShadowingModel(RSS, A, eta):
@@ -88,7 +94,14 @@ def lognormalShadowingModel(RSS, A, eta):
 	# Can't model N, so just have A and eta as input params
 	return math.pow( 10, (RSS - A) / (10*eta) ) * 100
 
+# Return distance to AP in cm based on measured RSS and c1, c2, c3 params for AP:
+def secondOrderShadowingModel(RSS, c1, c2, c3):
+	def quadratic(x,a,b,c):
+    	return a*x**2 + b*x - c - RSS
+    res = brentq(quadratic, -2.0, 2, args=(c1, c2, c3-RSS))
+	return math.pow( 10, res) * 100
 
+distances = [0,0,0,0]
 # For RSS values get an XYZ estimate based on the circular estimator model
 def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coordinates=[0,0,0], circType='weighted', stat='mean'):
 	# If we don't already have enough samples, get them:
@@ -106,7 +119,7 @@ def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coor
 		SSID = SSID_keys[i]
 		# circulate the moving average window:
 		samples[SSID] = np.roll(samples[SSID], -1)
-		samples[SSID][NUM_SAMPLES-1] = results[SSID]
+		samples[SSID][num_samples-1] = results[SSID]
 		# Apply the selected statistic:
 		if stat == 'mean':
 			stat_value = np.mean(samples[SSID])
@@ -122,6 +135,9 @@ def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coor
 		# Find the distance using the lognormal model:
 		distances[i] = lognormalShadowingModel( stat_value, \
 			LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )
+		# Used the second order lognormal model:
+		distances[i] = secondOrderShadowingModel( stat_value, \
+			SECORD_AP_PARAMS[SSID][0], SECORD_AP_PARAMS[SSID][1], SECORD_AP_PARAMS[SSID][2] )
 		print("Distance from AP {}: {} cm".format(SSID, distances[i]))
 
 	# Now get an estimate of where we are:

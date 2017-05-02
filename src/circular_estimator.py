@@ -4,7 +4,6 @@ from __future__ import print_function
 from scipy.optimize import minimize
 import numpy as np
 import math
-import pointy
 from scipy.spatial.distance import euclidean
 
 # Error printing

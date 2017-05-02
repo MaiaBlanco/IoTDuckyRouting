@@ -91,17 +91,17 @@ def lognormalShadowingModel(RSS, A, eta):
 
 # For RSS values get an XYZ estimate based on the circular estimator model
 def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coordinates=[0,0,0], circType='weighted', stat='mean'):
-	# Now continue recording new data and moving the window along the array:
-	results = getAPSignals(ESSIDs)
-	SSID_keys = sorted(samples.keys())
 	# If we don't already have enough samples, get them:
-	if bool(samples) or sorted(ESSIDs) != sorted(samples.keys() or len(samples[ESSIDs[0]]) < num_samples):
+	if not bool(samples) or sorted(ESSIDs) != sorted(samples.keys() or len(samples[ESSIDs[0]]) < num_samples):
 		print("Getting {} new samples.".format(num_samples))
 		samples = { ssid:np.zeros(num_samples) for ssid in ESSIDs}
 		for i in range(num_samples):
 			results = getAPSignals(ESSIDs)
 			for SSID in ESSIDs:
 				samples[SSID][i] = results[SSID]
+	# Now continue recording new data and moving the window along the array:
+	results = getAPSignals(ESSIDs)
+	SSID_keys = sorted(samples.keys())
 	for i in range(len(SSID_keys)):
 		SSID = SSID_keys[i]
 		# circulate the moving average window:
@@ -122,7 +122,7 @@ def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coor
 		# Find the distance using the lognormal model:
 		distances[i] = lognormalShadowingModel( stat_value, \
 			LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )
-		#print("Distance from AP {}: {} cm".format(SSID, distances[i]))
+		print("Distance from AP {}: {} cm".format(SSID, distances[i]))
 
 	# Now get an estimate of where we are:
 	if circType == 'weighted':
@@ -136,7 +136,8 @@ def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coor
 		else:
 			min_result = stdCircularEstimator(distances, AP_COORDS, coordinates, z=z_height)
 	else:
-		eprint("ERROR: invalid circular estimator type! (Needs 'weighted' or 'std')")		return None
+		eprint("ERROR: invalid circular estimator type! (Needs 'weighted' or 'std')")		
+                return None
 	return (samples, min_result)
 
 if __name__ == "__main__":
@@ -178,8 +179,8 @@ if __name__ == "__main__":
 	coordinates = [0,0,0]
 	while True:
 		(samples, min_result) = localize(ESSIDs, LN_AP_PARAMS, num_samples=NUM_SAMPLES, \
-			samples=samples, z_height=89, coordinates=coordinates, circType='weighted',\
-			 stat='mode')
+			samples=samples, z_height=z_height, coordinates=coordinates, circType='weighted',\
+			 stat='median')
 		if min_result is not None:
 			coordinates = min_result[:]
 			print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[2]))

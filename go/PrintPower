@@ -1,0 +1,118 @@
+#!/usr/bin/python
+from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+
+import time, atexit, sys, curses, iwlist
+from math import atan2, sqrt, degrees
+
+# create a default object, no changes to I2C address or frequency
+mh = Adafruit_MotorHAT(addr=0x60)
+lmotor = mh.getMotor(1)
+rmotor = mh.getMotor(2)
+
+# recommended for auto-disabling motors on shutdown!
+def STOP():
+	lmotor.run(Adafruit_MotorHAT.RELEASE)
+	rmotor.run(Adafruit_MotorHAT.RELEASE)
+
+atexit.register(STOP)
+
+ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
+def getAPSignals(SSID_List):
+	dataPoints = {}
+	values = SSIDScan(SSID_List)
+	for SSID in SSID_List:
+		if "dbm_level" in values[SSID].keys():
+			dataPoints[SSID] = float(values[SSID]["dbm_level"])
+		else:
+			eprint("Could not find any useful data for AP {}".format(SSID))
+			dataPoints.append(0.0)
+			continue
+	return dataPoints
+
+def SSIDScan(SSID_List):
+	rawData = iwlist.scan() # No arg since defaults to wlan0
+	cells = iwlist.parse(rawData)
+	ssids = [x for x in cells if x["essid"] in SSID_List]
+	tags = ["quality", "quality_total", "dbm_level", "signal_level", "signal_total"]
+	data = { x["essid"] : {k:v for k,v in x.iteritems() if k in tags} for x in ssids}
+	return data
+
+def DRIVE(lspd,rspd):
+	# Left Motor Drive Speed
+	if (lspd>0):
+		lmotor.run(Adafruit_MotorHAT.FORWARD)
+		lmotor.setSpeed(lspd)
+	elif (lspd<0):
+		lmotor.run(Adafruit_MotorHAT.BACKWARD)
+		lmotor.setSpeed(-lspd)
+	else:
+		lmotor.run(Adafruit_MotorHAT.RELEASE)
+
+	# Right Motor Drive Speed
+	if (rspd>0):
+		rmotor.run(Adafruit_MotorHAT.FORWARD)
+		rmotor.setSpeed(rspd)
+	elif (rspd<0):
+		rmotor.run(Adafruit_MotorHAT.BACKWARD)
+		rmotor.setSpeed(-rspd)
+	else:
+		rmotor.run(Adafruit_MotorHAT.RELEASE)
+
+def GO(speed,steer):
+	DRIVE(speed+steer,speed-steer)
+	time.sleep(0.01);
+
+def TurnLeft(degrees):
+	for i in range(0,105,5):
+		GO(i+1,i);
+	time.sleep((degrees-50.0)/210.0)
+	for i in reversed(range(0,105,5)):
+		GO(i+1,i);
+	STOP()
+
+def GoDistance(cm):
+	for i in range(50,100):
+		GO(i,0);
+	time.sleep((cm-19.3)/16.7)
+	for i in reversed(range(50,100)):
+		GO(i,0);
+	STOP()
+
+def GoToPoint(xtgt,ytgt):
+	xnow=515
+	ynow=350
+	hdgnow=0
+
+	hdgtgt=degrees(atan2((ytgt-ynow),(xtgt-xnow)))
+	dhdg=hdgnow-hdgtgt
+	print(hdgtgt);
+	while dhdg<60:
+		dhdg=dhdg+360
+	TurnLeft(dhdg)
+	dist=sqrt((xnow-xtgt)**2+(ynow-ytgt)**2)
+	GoDistance(dist)
+
+
+
+
+# Heading = degrees up(Y) above X
+# Y
+# ^
+# |             E(90 deg)
+# |             ^
+# | (180 deg)S<-+->N(0 deg)
+# |             v
+# |             W(270 deg)
+# +---------------------------->X
+#
+
+
+################################# DC motor test!
+
+for i in range(1,100):
+	accumulator=[0,0,0,0]
+	APS=getAPSignals(ESSIDs)
+	print(APS);
+
+	time.sleep(1);
+

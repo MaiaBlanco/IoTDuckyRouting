@@ -91,10 +91,10 @@ def GoToPoint(xtgt,ytgt,maxdist=10000):
 ################################# DC motor test!
 while True:
 	# Locate the current position
-	loc=localize(ESSIDs, LN_AP_PARAMS,5,z_height=12)
+	loc=localize(ESSIDs, LN_AP_PARAMS,10,z_height=12)
 	loc=loc[1]
 	xnow=loc[0]
 	ynow=loc[0]
 	print(loc)
 	# Go there
-	GoToPoint(650,300,100)
+	GoToPoint(0,300,12)

@@ -110,11 +110,17 @@ def GoToPoint(xtgt,ytgt):
 ################################# DC motor test!
 
 for i in range(1,100):
-	GO(50,60);
-	time.sleep(0.2);
-	STOP();
+	GO(50,60)
+	time.sleep(0.2)
+	STOP()
+	accumulator=[0,0,0,0]
 	for j in range(1,10):
-		getAPSignals(ESSIDs);
+		APS=getAPSignals(ESSIDs)
+		accumulator[0]=accumulator[0]+APS["IOT-AP01"]
+		accumulator[1]=accumulator[1]+APS["IOT-AP02"]
+		accumulator[2]=accumulator[2]+APS["IOT-AP03"]
+		accumulator[3]=accumulator[3]+APS["IOT-AP04"]
+	print(accumulator);
 
 	time.sleep(1);
 

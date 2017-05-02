@@ -96,10 +96,11 @@ def lognormalShadowingModel(RSS, A, eta):
 
 # Return distance to AP in cm based on measured RSS and c1, c2, c3 params for AP:
 def secondOrderShadowingModel(RSS, c1, c2, c3):
-	def quadratic(x,a,b,c):
-    	return a*x**2 + b*x - c - RSS
-    res = brentq(quadratic, -2.0, 2, args=(c1, c2, c3-RSS))
-	return math.pow( 10, res) * 100
+    def quadratic(x,a,b,c):
+        print(x, a, b, c)
+        return a*(x**2) + b*x - c
+    res = brentq(quadratic, -8, 4, args=(c1, c2, c3-RSS))
+    return math.pow( 10, res) * 100
 
 distances = [0,0,0,0]
 # For RSS values get an XYZ estimate based on the circular estimator model
@@ -136,8 +137,8 @@ def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coor
 		distances[i] = lognormalShadowingModel( stat_value, \
 			LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )
 		# Used the second order lognormal model:
-		distances[i] = secondOrderShadowingModel( stat_value, \
-			SECORD_AP_PARAMS[SSID][0], SECORD_AP_PARAMS[SSID][1], SECORD_AP_PARAMS[SSID][2] )
+		#distances[i] = secondOrderShadowingModel( stat_value, \
+		#	SECORD_AP_PARAMS[SSID][0], SECORD_AP_PARAMS[SSID][1], SECORD_AP_PARAMS[SSID][2] )
 		print("Distance from AP {}: {} cm".format(SSID, distances[i]))
 
 	# Now get an estimate of where we are:

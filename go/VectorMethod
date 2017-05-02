@@ -3,6 +3,7 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 
 import time, atexit, sys, curses
 from math import atan2, sqrt, degrees
+from wifi_distance import *
 
 # create a default object, no changes to I2C address or frequency
 mh = Adafruit_MotorHAT(addr=0x60)
@@ -15,6 +16,7 @@ def STOP():
 	rmotor.run(Adafruit_MotorHAT.RELEASE)
 
 atexit.register(STOP)
+
 
 def DRIVE(lspd,rspd):
 	# Left Motor Drive Speed
@@ -58,7 +60,7 @@ def GoDistance(cm):
 	STOP()
 
 xnow=515
-ynow=350
+ynow=300
 hdgnow=0
 def GoToPoint(xtgt,ytgt,maxdist=10000):
 	global xnow, ynow, hdgnow
@@ -89,6 +91,10 @@ def GoToPoint(xtgt,ytgt,maxdist=10000):
 ################################# DC motor test!
 while True:
 	# Locate the current position
-	#LocatenDesPointen();
+	loc=localize(ESSIDs, LN_AP_PARAMS,5,z_height=12)
+	loc=loc[1]
+	xnow=loc[0]
+	ynow=loc[0]
+	print(loc)
 	# Go there
-	GoToPoint(515,30,100)
+	GoToPoint(650,300,100)

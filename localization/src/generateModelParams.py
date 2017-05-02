@@ -65,26 +65,26 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 if __name__ == "__main__":
-	# Check user input
-	if len(sys.argv) != 2:
-		eprint("USAGE: {} output_filename.json".format(sys.argv[0]))
-		sys.exit(1)
-	file = sys.argv[1]
-	with open(file, 'r') as f:
-		data = f.read()
-		dataPoints = json.loads(data);
-		for AP in ESSIDs:
-			AP_CSV_FILES[AP] = open("../data/"+AP+".csv", 'w')
+    # Check user input
+    if len(sys.argv) != 2:
+        eprint("USAGE: {} input_filename.json".format(sys.argv[0]))
+        sys.exit(1)
+    file = sys.argv[1]
+    with open(file, 'r') as f:
+        data = f.read()
+        dataPoints = json.loads(data);
+        for AP in ESSIDs:
+            AP_CSV_FILES[AP] = open("../data/"+AP+".csv", 'w')
 
 # For each point in the dataset, calculate the distance from each AP and print as separate CSVs the following:
 # distance to AP, dbm value
-	for point, value in dataPoints.items():
-		point_coord = [float(x) for x in point.strip('(').strip(')').split(", ")]
-		print("Point coord: {}".format(point_coord))
-		# Each value corresponding to point_coord has 20 samples for each access point
-		for AP in ESSIDs:
-			dist = spaceDist.euclidean(COORDS[AP], point_coord)
-			for sample in value[AP]:
-				AP_CSV_FILES[AP].write("{}, {}\n".format(dist, sample["dbm_level"]))
-				
+    for point, value in dataPoints.items():
+        point_coord = [float(x) for x in point.strip('(').strip(')').split(", ")]
+        print("Point coord: {}".format(point_coord))
+        # Each value corresponding to point_coord has 20 samples for each access point
+        for AP in ESSIDs:
+            dist = spaceDist.euclidean(COORDS[AP], point_coord)
+            for sample in value[AP]:
+                AP_CSV_FILES[AP].write("{}, {}\n".format(dist, sample["dbm_level"]))
+                    
 

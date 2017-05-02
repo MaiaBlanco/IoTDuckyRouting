@@ -10,11 +10,14 @@ import numpy as np
 import math
 from circular_estimator import weightedCircularEstimator
 from circular_estimator import stdCircularEstimator
+from scipy import stats
 
+# Weighted or standard circular estimator:
+method = 'weighted'
 # Add the names of any access points/ESSIDs to scan here:
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
 # number of samples to keep for techniques like moving average:
-NUM_SAMPLES = 20
+NUM_SAMPLES = 10
 # reference to pretty print function:
 pp = pprint.PrettyPrinter(indent=4)
 # Lognormal distance model parameters (A, eta, R^2):
@@ -85,8 +88,18 @@ def lognormalShadowingModel(RSS, A, eta):
 	# Can't model N, so just have A and eta as input params
 	return math.pow( 10, (RSS - A) / (10*eta) ) * 100
 
-def localize(ESSIDs, circType, z_height, LN_AP_PARAMS, samples, coordinates):
-	# Now continue recording new data and moving the window average along the array:
+
+# For RSS values get an XYZ estimate based on the circular estimator model
+def localize(ESSIDs, LN_AP_PARAMS, num_samples=20, samples={}, z_height=-1, coordinates=[0,0,0], circType='weighted', stat='mean'):
+	# If we don't already have enough samples, get them:
+	if not bool(samples) or sorted(ESSIDs) != sorted(samples.keys() or len(samples[ESSIDs[0]]) < num_samples):
+		print("Getting {} new samples.".format(num_samples))
+		samples = { ssid:np.zeros(num_samples) for ssid in ESSIDs}
+		for i in range(num_samples):
+			results = getAPSignals(ESSIDs)
+			for SSID in ESSIDs:
+				samples[SSID][i] = results[SSID]
+	# Now continue recording new data and moving the window along the array:
 	results = getAPSignals(ESSIDs)
 	SSID_keys = sorted(samples.keys())
 	for i in range(len(SSID_keys)):
@@ -94,10 +107,22 @@ def localize(ESSIDs, circType, z_height, LN_AP_PARAMS, samples, coordinates):
 		# circulate the moving average window:
 		samples[SSID] = np.roll(samples[SSID], -1)
 		samples[SSID][NUM_SAMPLES-1] = results[SSID]
+		# Apply the selected statistic:
+		if stat == 'mean':
+			stat_value = np.mean(samples[SSID])
+		elif stat == 'median':
+			stat_value = np.median(samples[SSID])
+		elif stat == 'mode':
+			[hist, bin_edges] = np.histogram(samples[SSID], 20)
+			idx = np.argmax(hist)
+			stat_value = bin_edges[idx]
+		else:
+			eprint("ERROR: invalid statistic. Choose from ['mean', 'median', 'mode']")
+			return None
 		# Find the distance using the lognormal model:
-		distances[i] = lognormalShadowingModel( np.mean(samples[SSID]), \
+		distances[i] = lognormalShadowingModel( stat_value, \
 			LN_AP_PARAMS[SSID][0], LN_AP_PARAMS[SSID][1] )
-		#print("Distance from AP {}: {} cm".format(SSID, distances[i]))
+		print("Distance from AP {}: {} cm".format(SSID, distances[i]))
 
 	# Now get an estimate of where we are:
 	if circType == 'weighted':
@@ -111,8 +136,8 @@ def localize(ESSIDs, circType, z_height, LN_AP_PARAMS, samples, coordinates):
 		else:
 			min_result = stdCircularEstimator(distances, AP_COORDS, coordinates, z=z_height)
 	else:
-		eprint('ERROR: invalid circular estimator type! (Needs weighted or std)')
-		return None
+		eprint("ERROR: invalid circular estimator type! (Needs 'weighted' or 'std')")		
+                return None
 	return (samples, min_result)
 
 if __name__ == "__main__":
@@ -153,7 +178,9 @@ if __name__ == "__main__":
 			samples[SSID][i] = results[SSID]
 	coordinates = [0,0,0]
 	while True:
-		(samples, min_result) = localize(ESSIDs, circType, z_height, LN_AP_PARAMS, samples, coordinates)
+		(samples, min_result) = localize(ESSIDs, LN_AP_PARAMS, num_samples=NUM_SAMPLES, \
+			samples=samples, z_height=z_height, coordinates=coordinates, circType='weighted',\
+			 stat='median')
 		if min_result is not None:
 			coordinates = min_result[:]
 			print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[2]))

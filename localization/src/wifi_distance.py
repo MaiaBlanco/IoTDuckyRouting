@@ -11,6 +11,8 @@ import math
 from circular_estimator import weightedCircularEstimator
 from circular_estimator import stdCircularEstimator
 
+# Weighted or standard circular estimator:
+method = 'weighted'
 # Add the names of any access points/ESSIDs to scan here:
 ESSIDs = ["IOT-AP01", "IOT-AP02", "IOT-AP03", "IOT-AP04"]
 # number of samples to keep for techniques like moving average:
@@ -153,7 +155,7 @@ if __name__ == "__main__":
 			samples[SSID][i] = results[SSID]
 	coordinates = [0,0,0]
 	while True:
-		(samples, min_result) = localize(ESSIDs, circType, z_height, LN_AP_PARAMS, samples, coordinates)
+		(samples, min_result) = localize(ESSIDs, method, z_height, LN_AP_PARAMS, samples, coordinates)
 		if min_result is not None:
 			coordinates = min_result[:]
 			print("Estimated Coordinates:\tx: {:10.4f}\ty: {:10.4f}\tz: {:10.4f}".format(coordinates[0], coordinates[1], coordinates[2]))

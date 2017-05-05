@@ -28,6 +28,10 @@ def weightedCircularEstimator(dists, AP_list, x0, z=-1):
 	else:
                 print("Residual: "+str(res.fun))
                 coords = list(res.x)
+                coords[0] = min(coords[0], room_dimensions[0][1])
+                coords[0] = max(coords[0], room_dimensions[0][0])
+                coords[1] = min(coords[1], room_dimensions[1][1])
+                coords[1] = max(coords[1], room_dimensions[1][0])
                 if len(coords) == 2:
 			return [coords[0], coords[1], z]
 		else:

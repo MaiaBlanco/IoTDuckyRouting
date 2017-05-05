@@ -54,6 +54,7 @@ def TurnLeft(degrees):
 def GoDistance(cm):
 	for i in range(50,100):
 		GO(i,0)
+	GO(100,-2)
 	time.sleep((cm-19.3)/16.7)
 	for i in reversed(range(50,100)):
 		GO(i,0)
@@ -71,7 +72,7 @@ def GoToPoint(xtgt,ytgt,maxdist=10000):
 	TurnLeft(dhdg)
 	hdgnow=hdgtgt
 	dist=sqrt((xnow-xtgt)**2+(ynow-ytgt)**2)
-        if dist < thresh_dist:
+        if dist < 100:
             GO(0,100)
             time.sleep(300)
 	GoDistance(min(dist,maxdist))
@@ -102,4 +103,5 @@ while True:
 	# Go there
         print(" Heading = degrees up(Y) above X\n Y\n ^\n |             E(90 deg)\n |             ^\n | (180 deg)S<-+->N(0 deg)\n |             \n |             W(270 deg)\n +---------------------------->X")
         hdgnow = int(input("Enter my current heading: "))
-	GoToPoint(0,300,12)
+	#GoToPoint(310, 340, 100)
+	GoToPoint(640, 210, 150)
